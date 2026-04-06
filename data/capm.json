@@ -1,0 +1,136 @@
+{
+  "assunto": "CAPM – Capital Asset Pricing Model",
+  "descricao": "Questões sobre o Modelo de Precificação de Ativos de Capital (CAPM), fórmula, beta, prêmio de risco e conceitos relacionados.",
+  "questoes": [
+    {
+      "id": 1,
+      "enunciado": "De acordo com o CAPM (Capital Asset Pricing Model), a fórmula correta para o retorno esperado de um ativo é:",
+      "opcoes": [
+        "A) E(Ri) = Rf + βi × Rm",
+        "B) E(Ri) = Rf + βi × (E(Rm) − Rf)",
+        "C) E(Ri) = Rm − βi × (E(Rm) − Rf)",
+        "D) E(Ri) = βi × Rf + (E(Rm) − Rf)",
+        "E) E(Ri) = Rf × βi + E(Rm)"
+      ],
+      "gabarito": "B",
+      "explicacao": "A fórmula do CAPM é E(Ri) = Rf + βi × (E(Rm) − Rf), onde Rf é a taxa livre de risco, βi é o beta do ativo e (E(Rm) − Rf) é o prêmio de risco de mercado."
+    },
+    {
+      "id": 2,
+      "enunciado": "Um ativo possui beta igual a 1,5. A taxa livre de risco é 5% a.a. e o retorno esperado do mercado é 12% a.a. Qual o retorno esperado desse ativo pelo CAPM?",
+      "opcoes": [
+        "A) 15,5%",
+        "B) 16,5%",
+        "C) 17,5%",
+        "D) 18,0%",
+        "E) 13,5%"
+      ],
+      "gabarito": "A",
+      "explicacao": "E(Ri) = 5% + 1,5 × (12% − 5%) = 5% + 1,5 × 7% = 5% + 10,5% = 15,5%"
+    },
+    {
+      "id": 3,
+      "enunciado": "No contexto do CAPM, um ativo com beta igual a zero possui retorno esperado igual a:",
+      "opcoes": [
+        "A) Zero, pois não há risco.",
+        "B) O retorno do mercado (E(Rm)).",
+        "C) A taxa livre de risco (Rf).",
+        "D) O prêmio de risco do mercado.",
+        "E) A média entre Rf e E(Rm)."
+      ],
+      "gabarito": "C",
+      "explicacao": "Substituindo β = 0 na fórmula: E(Ri) = Rf + 0 × (E(Rm) − Rf) = Rf. O ativo sem correlação com o mercado tem retorno esperado igual à taxa livre de risco."
+    },
+    {
+      "id": 4,
+      "enunciado": "A Security Market Line (SML) representa graficamente a relação entre:",
+      "opcoes": [
+        "A) Retorno esperado e desvio padrão total do ativo.",
+        "B) Retorno esperado e risco sistemático (beta) de um ativo.",
+        "C) Risco diversificável e retorno esperado do portfólio.",
+        "D) Risco total e retorno esperado do portfólio de mercado.",
+        "E) Covariância dos ativos e taxa livre de risco."
+      ],
+      "gabarito": "B",
+      "explicacao": "A SML (Security Market Line) relaciona o retorno esperado dos ativos ao seu risco sistemático medido pelo beta (β), sendo a representação gráfica do CAPM."
+    },
+    {
+      "id": 5,
+      "enunciado": "Um analista verifica que um ativo está plotado ACIMA da Security Market Line (SML). Isso indica que o ativo está:",
+      "opcoes": [
+        "A) Supervalorizado, pois oferece retorno abaixo do exigido pelo risco.",
+        "B) Corretamente valorizado pelo mercado.",
+        "C) Subvalorizado, pois oferece retorno acima do exigido pelo risco.",
+        "D) Com beta negativo, reduzindo o risco da carteira.",
+        "E) Com maior risco total do que o portfólio de mercado."
+      ],
+      "gabarito": "C",
+      "explicacao": "Um ativo acima da SML oferece retorno esperado maior do que o exigido pelo CAPM dado seu nível de risco sistemático. Isso o torna subvalorizado (oportunidade de compra), pois o mercado ainda não precificou corretamente."
+    },
+    {
+      "id": 6,
+      "enunciado": "Qual das alternativas abaixo NÃO é uma hipótese do CAPM?",
+      "opcoes": [
+        "A) Os investidores têm expectativas homogêneas sobre os retornos dos ativos.",
+        "B) Os mercados de capitais são perfeitos e sem custos de transação.",
+        "C) Os investidores podem emprestar e tomar emprestado à taxa livre de risco.",
+        "D) Os investidores possuem horizontes de investimento diferentes.",
+        "E) Todos os ativos são divisíveis e negociáveis."
+      ],
+      "gabarito": "D",
+      "explicacao": "Uma das premissas do CAPM é que todos os investidores têm o MESMO horizonte de investimento (período único). Horizontes diferentes violam a hipótese do modelo."
+    },
+    {
+      "id": 7,
+      "enunciado": "O beta de um portfólio composto por dois ativos A (β=0,8; peso=40%) e B (β=1,4; peso=60%) é:",
+      "opcoes": [
+        "A) 1,00",
+        "B) 1,10",
+        "C) 1,16",
+        "D) 1,20",
+        "E) 0,96"
+      ],
+      "gabarito": "C",
+      "explicacao": "βportfólio = 0,40 × 0,8 + 0,60 × 1,4 = 0,32 + 0,84 = 1,16"
+    },
+    {
+      "id": 8,
+      "enunciado": "No CAPM, o prêmio de risco do mercado (market risk premium) é definido como:",
+      "opcoes": [
+        "A) Rf − E(Rm)",
+        "B) E(Rm) + Rf",
+        "C) βi × Rf",
+        "D) E(Rm) − Rf",
+        "E) E(Ri) − βi"
+      ],
+      "gabarito": "D",
+      "explicacao": "O prêmio de risco de mercado é E(Rm) − Rf, ou seja, o excesso de retorno do portfólio de mercado em relação à taxa livre de risco. Representa a compensação adicional por assumir o risco sistemático do mercado."
+    },
+    {
+      "id": 9,
+      "enunciado": "Um ativo com beta negativo (β < 0), quando adicionado a uma carteira, tem como efeito esperado:",
+      "opcoes": [
+        "A) Aumentar o retorno esperado da carteira acima do retorno de mercado.",
+        "B) Reduzir o risco sistemático da carteira, pois se move contrariamente ao mercado.",
+        "C) Eliminar completamente o risco não sistemático do portfólio.",
+        "D) Tornar o retorno esperado da carteira igual à taxa livre de risco.",
+        "E) Nenhum efeito sobre o risco, pois beta não mede o risco total."
+      ],
+      "gabarito": "B",
+      "explicacao": "Um ativo com beta negativo tem retornos que se movem na direção oposta ao mercado (ex: ouro em crises). Ao incluí-lo na carteira, ele tende a reduzir o beta total do portfólio, servindo como hedge contra movimentos adversos do mercado."
+    },
+    {
+      "id": 10,
+      "enunciado": "Segundo o CAPM, a principal diferença entre risco sistemático e risco não sistemático é que:",
+      "opcoes": [
+        "A) Ambos são remunerados pelo mercado na mesma proporção.",
+        "B) Apenas o risco não sistemático é remunerado pelo mercado, pois é inevitável.",
+        "C) O risco sistemático pode ser eliminado pela diversificação, ao contrário do não sistemático.",
+        "D) O risco não sistemático pode ser eliminado pela diversificação; apenas o sistemático é remunerado.",
+        "E) O risco sistemático é específico da empresa e não afeta o mercado como um todo."
+      ],
+      "gabarito": "D",
+      "explicacao": "O risco não sistemático (específico, idiossincrático) pode ser eliminado por diversificação. Por isso, o mercado não remunera esse risco. Apenas o risco sistemático (beta), que não pode ser diversificado, é remunerado pelo prêmio de risco de mercado no CAPM."
+    }
+  ]
+}
