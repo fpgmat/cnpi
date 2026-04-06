@@ -4,9 +4,18 @@
    ============================================================ */
 
 // ── Config ────────────────────────────────────────────────────
-const GEMINI_API_KEY = 'AIzaSyDNBwEHDNQupjuepf72E5sbELrCts6u9Ck';
-const GEMINI_MODEL   = 'gemini-2.0-flash';
-const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+// ⚠️  A chave NÃO fica no código — é salva só no navegador do usuário (localStorage)
+const GEMINI_MODEL = 'gemini-2.0-flash';
+
+function getApiKey() {
+  return localStorage.getItem('cnpi_gemini_key') || '';
+}
+function saveApiKey(key) {
+  localStorage.setItem('cnpi_gemini_key', key.trim());
+}
+function getEndpoint() {
+  return `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${getApiKey()}`;
+}
 
 // ── State ─────────────────────────────────────────────────────
 let allQuestions     = [];   // todas as questões carregadas
@@ -23,6 +32,7 @@ let generatedQuestions = [];  // questões geradas pela IA
 document.addEventListener('DOMContentLoaded', async () => {
   await loadQuestions();
   renderBanco();
+  checkApiKeyBanner();
 });
 
 // ── Load Questions from JSON ──────────────────────────────────
@@ -322,7 +332,35 @@ function exportJSON() {
 }
 
 // ── IA — Gemini ───────────────────────────────────────────────
+function checkApiKeyBanner() {
+  const keyEl = document.getElementById('ia-key-input');
+  if (keyEl && getApiKey()) keyEl.value = '••••••••••••••••••••••';
+}
+
+function salvarChave() {
+  const val = document.getElementById('ia-key-input').value.trim();
+  if (!val || val.startsWith('•')) return;
+  saveApiKey(val);
+  document.getElementById('ia-key-input').value = '••••••••••••••••••••••';
+  showToast('🔑 Chave salva no seu navegador!');
+  document.getElementById('ia-key-banner').style.display = 'none';
+}
+
+function limparChave() {
+  localStorage.removeItem('cnpi_gemini_key');
+  document.getElementById('ia-key-input').value = '';
+  document.getElementById('ia-key-banner').style.display = 'flex';
+  showToast('🗑️ Chave removida.');
+}
+
 async function gerarQuestoes() {
+  const key = getApiKey();
+  if (!key) {
+    document.getElementById('ia-error').textContent = '🔑 Insira sua chave da API do Gemini acima antes de gerar questões.';
+    document.getElementById('ia-error').style.display = 'block';
+    return;
+  }
+
   const assunto    = document.getElementById('ia-assunto').value.trim() || 'CAPM';
   const quantidade = parseInt(document.getElementById('ia-quantidade').value);
   const nivel      = document.getElementById('ia-nivel').value;
@@ -340,7 +378,7 @@ async function gerarQuestoes() {
   const prompt = buildPrompt(assunto, quantidade, nivel, contexto);
 
   try {
-    const res = await fetch(GEMINI_ENDPOINT, {
+    const res = await fetch(getEndpoint(), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
