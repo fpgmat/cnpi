@@ -4,11 +4,10 @@
    ============================================================ */
 
 // ── Config ───────────────────────────────────────────────────
-const IA_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
-const IA_MODEL    = 'qwen/qwen3.6-plus-preview:free';
-const IA_KEY      = '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';
+// Google Apps Script como proxy para a IA (esconde a chave server-side)
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxby9xNxVfon6y-CTT0jAELH8Z8OOAkXAGjLAS0NTJ-WIE5emHw-s8YKNpcatXMfm4b/exec';
 
-// ── State ────────────────────────────────────────────────────
+// ── State ───────────────────────────────────────────────────
 let allQuestions       = [];
 let quizQuestions      = [];
 let currentQIndex      = 0;
@@ -46,9 +45,7 @@ function showSection(name) {
   document.getElementById('section-ia').style.display        = 'none';
   document.getElementById('section-subjects').style.display  = 'block';
   document.getElementById('hero').style.display              = 'block';
-
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-
   if (name === 'quiz') {
     document.getElementById('hero').style.display             = 'none';
     document.getElementById('section-subjects').style.display = 'none';
@@ -85,18 +82,12 @@ function showQuizStart() {
 function beginQuiz() {
   const shuffle  = document.getElementById('opt-shuffle').checked;
   const useTimer = document.getElementById('opt-timer').checked;
-
   quizQuestions = [...allQuestions];
   if (shuffle) quizQuestions = shuffleArray(quizQuestions);
-
-  currentQIndex = 0;
-  score = 0;
-  timerSeconds = 0;
-
+  currentQIndex = 0; score = 0; timerSeconds = 0;
   document.getElementById('quiz-start').style.display   = 'none';
   document.getElementById('quiz-active').style.display  = 'block';
   document.getElementById('quiz-results').style.display = 'none';
-
   const timerEl = document.getElementById('quiz-timer');
   if (useTimer) {
     timerEl.style.display = 'flex';
@@ -117,50 +108,41 @@ function abortQuiz() { clearInterval(timerInterval); showQuizStart(); }
 
 // ── Render Question ───────────────────────────────────────────
 function renderQuestion() {
-  const q = quizQuestions[currentQIndex];
+  var q = quizQuestions[currentQIndex];
   if (!q) return;
-  selectedOption = null;
-  answered = false;
-
+  selectedOption = null; answered = false;
   document.getElementById('q-num').textContent      = 'Questão ' + (currentQIndex + 1);
   document.getElementById('q-current').textContent   = currentQIndex + 1;
   document.getElementById('q-total').textContent     = quizQuestions.length;
   document.getElementById('q-text').textContent      = q.enunciado;
-
-  const pct = (currentQIndex / quizQuestions.length) * 100;
+  var pct = (currentQIndex / quizQuestions.length) * 100;
   document.getElementById('progress-bar').style.width = pct + '%';
-
-  const list = document.getElementById('options-list');
+  var list = document.getElementById('options-list');
   list.innerHTML = '';
-  q.opcoes.forEach((opt, i) => {
-    const letter = opt.charAt(0);
-    const text   = opt.slice(3);
-    const div    = document.createElement('div');
+  q.opcoes.forEach(function(opt, i) {
+    var letter = opt.charAt(0);
+    var text   = opt.slice(3);
+    var div    = document.createElement('div');
     div.className = 'option-item';
     div.id        = 'opt-' + i;
-    div.onclick   = () => selectOption(i, letter);
+    div.onclick   = function() { selectOption(i, letter); };
     div.innerHTML = '<span class="option-letter">' + letter + '</span><span>' + text + '</span>';
     list.appendChild(div);
   });
-
-  const fb = document.getElementById('q-feedback');
-  fb.style.display = 'none';
-  fb.className = 'question-feedback';
-
+  var fb = document.getElementById('q-feedback');
+  fb.style.display = 'none'; fb.className = 'question-feedback';
   document.getElementById('btn-confirm').style.display = 'inline-flex';
   document.getElementById('btn-confirm').disabled = true;
   document.getElementById('btn-next').style.display = 'none';
-
-  const card = document.getElementById('question-card');
-  card.style.animation = 'none';
-  void card.offsetWidth;
+  var card = document.getElementById('question-card');
+  card.style.animation = 'none'; void card.offsetWidth;
   card.style.animation = 'slideUp 0.35s cubic-bezier(0.4, 0, 0.2, 1)';
 }
 
 function selectOption(index, letter) {
   if (answered) return;
   selectedOption = { index, letter };
-  document.querySelectorAll('.option-item').forEach(el => el.classList.remove('selected'));
+  document.querySelectorAll('.option-item').forEach(function(el) { el.classList.remove('selected'); });
   document.getElementById('opt-' + index).classList.add('selected');
   document.getElementById('btn-confirm').disabled = false;
 }
@@ -168,25 +150,22 @@ function selectOption(index, letter) {
 function confirmAnswer() {
   if (!selectedOption || answered) return;
   answered = true;
-  const q = quizQuestions[currentQIndex];
-  const isCorrect = selectedOption.letter === q.gabarito;
+  var q = quizQuestions[currentQIndex];
+  var isCorrect = selectedOption.letter === q.gabarito;
   if (isCorrect) score++;
   q._userAnswer = selectedOption.letter;
-
-  document.querySelectorAll('.option-item').forEach(el => {
+  document.querySelectorAll('.option-item').forEach(function(el) {
     el.classList.add('disabled');
-    const letter = el.querySelector('.option-letter').textContent;
+    var letter = el.querySelector('.option-letter').textContent;
     if (letter === q.gabarito) el.classList.add('correct');
     else if (el.id === 'opt-' + selectedOption.index) el.classList.add('wrong');
   });
-
-  const fb = document.getElementById('q-feedback');
+  var fb = document.getElementById('q-feedback');
   fb.className = 'question-feedback ' + (isCorrect ? 'feedback-correct' : 'feedback-wrong');
   fb.innerHTML = '<strong>' + (isCorrect ? 'Correto!' : 'Incorreto!') + '</strong><br/>' + q.explicacao;
   fb.style.display = 'block';
-
   document.getElementById('btn-confirm').style.display = 'none';
-  const btnNext = document.getElementById('btn-next');
+  var btnNext = document.getElementById('btn-next');
   btnNext.style.display = 'inline-flex';
   btnNext.textContent = currentQIndex < quizQuestions.length - 1 ? 'Próxima →' : 'Ver Resultado';
 }
@@ -200,36 +179,32 @@ function nextQuestion() {
 // ── Quiz Results ──────────────────────────────────────────────
 function finishQuiz() {
   clearInterval(timerInterval);
-  const total = quizQuestions.length;
-  const pct   = Math.round((score / total) * 100);
-
+  var total = quizQuestions.length;
+  var pct   = Math.round((score / total) * 100);
   document.getElementById('quiz-active').style.display  = 'none';
   document.getElementById('quiz-results').style.display = 'block';
   document.getElementById('review-section').style.display = 'none';
-
   document.getElementById('score-num').textContent  = score;
   document.getElementById('score-den').textContent  = '/' + total;
   document.getElementById('results-pct').textContent = pct + '% de acertos';
   document.getElementById('progress-bar').style.width = '100%';
-
-  document.getElementById('results-emoji').textContent = pct >= 80 ? '' : pct >= 60 ? '' : pct >= 40 ? '' : '';
-
-  setTimeout(() => { document.getElementById('results-bar').style.width = pct + '%'; }, 100);
+  document.getElementById('results-emoji').textContent = pct >= 80 ? '🏆' : pct >= 60 ? '👏' : pct >= 40 ? '📚' : '💪';
+  setTimeout(function() { document.getElementById('results-bar').style.width = pct + '%'; }, 100);
 }
 
 function showReview() {
-  const revSec = document.getElementById('review-section');
+  var revSec = document.getElementById('review-section');
   revSec.style.display = 'block';
-  const list = document.getElementById('review-list');
+  var list = document.getElementById('review-list');
   list.innerHTML = '';
-  quizQuestions.forEach((q, i) => {
-    const isCorrect = (q._userAnswer === q.gabarito);
-    const div = document.createElement('div');
+  quizQuestions.forEach(function(q, i) {
+    var isCorrect = (q._userAnswer === q.gabarito);
+    var div = document.createElement('div');
     div.className = 'review-item ' + (isCorrect ? 'review-correct' : 'review-wrong');
     div.innerHTML = '<span class="review-tag ' + (isCorrect ? 'tag-correct' : 'tag-wrong') + '">'
-      + (isCorrect ? 'Correto' : 'Incorreto') + '</span>'
+      + (isCorrect ? '✓ Correto' : '✗ Incorreto') + '</span>'
       + '<div class="review-q">Q' + (i+1) + '. ' + q.enunciado + '</div>'
-      + '<div class="review-exp"> ' + q.explicacao.replace(/</g,'&lt;') + '</div>';
+      + '<div class="review-exp">💡 ' + q.explicacao + '</div>';
     list.appendChild(div);
   });
   revSec.scrollIntoView({ behavior: 'smooth' });
@@ -237,15 +212,15 @@ function showReview() {
 
 // ── Banco de Questões ─────────────────────────────────────────
 function renderBanco(questions) {
-  const list = document.getElementById('banco-list');
+  var list = document.getElementById('banco-list');
   list.innerHTML = '';
-  const qs = questions || allQuestions;
-  qs.forEach((q, i) => {
-    const card = document.createElement('div');
+  var qs = questions || allQuestions;
+  qs.forEach(function(q, i) {
+    var card = document.createElement('div');
     card.className = 'banco-card';
     card.id = 'banco-' + i;
-    const opts = q.opcoes.map(o => {
-      const isGab = o.charAt(0) === q.gabarito;
+    var opts = q.opcoes.map(function(o) {
+      var isGab = o.charAt(0) === q.gabarito;
       return '<div class="banco-option ' + (isGab ? 'gabarito' : '') + '">' + o + (isGab ? ' ✓' : '') + '</div>';
     }).join('');
     card.innerHTML = '<div class="banco-card-header" onclick="toggleBancoCard(' + i + ')">'
@@ -255,7 +230,7 @@ function renderBanco(questions) {
       + '<div class="banco-card-body">'
       + '<div style="font-size:0.95rem;margin-bottom:1rem;color:var(--text-primary);">' + q.enunciado + '</div>'
       + '<div class="banco-options">' + opts + '</div>'
-      + '<div class="banco-exp"> ' + q.explicacao + '</div></div>';
+      + '<div class="banco-exp">💡 ' + q.explicacao + '</div></div>';
     list.appendChild(card);
   });
 }
@@ -263,77 +238,74 @@ function renderBanco(questions) {
 function toggleBancoCard(i) { document.getElementById('banco-' + i).classList.toggle('open'); }
 
 function filterQuestions() {
-  const term = document.getElementById('search-input').value.toLowerCase();
-  const filtered = allQuestions.filter(q =>
-    q.enunciado.toLowerCase().includes(term) ||
-    q.opcoes.some(o => o.toLowerCase().includes(term)) ||
-    q.explicacao.toLowerCase().includes(term)
-  );
+  var term = document.getElementById('search-input').value.toLowerCase();
+  var filtered = allQuestions.filter(function(q) {
+    return q.enunciado.toLowerCase().includes(term)
+      || q.opcoes.some(function(o) { return o.toLowerCase().includes(term); })
+      || q.explicacao.toLowerCase().includes(term);
+  });
   renderBanco(filtered);
 }
 
 function exportJSON() {
-  const data = { assunto: 'CAPM', questoes: allQuestions };
-  downloadJSON(data, 'cnpi-capm-questoes.json');
+  downloadJSON({ assunto: 'CAPM', questoes: allQuestions }, 'cnpi-capm-questoes.json');
 }
 
-// ── IA — Gerar Questões ──────────────────────────────────────
+// ── IA — Gerar Questões (via Google Apps Script proxy) ───────
 async function gerarQuestoes() {
-  const assunto    = document.getElementById('ia-assunto').value.trim() || 'CAPM';
-  const quantidade = parseInt(document.getElementById('ia-quantidade').value);
-  const nivel      = document.getElementById('ia-nivel').value;
-  const contexto   = document.getElementById('ia-contexto').value.trim();
+  var assunto    = document.getElementById('ia-assunto').value.trim() || 'CAPM';
+  var quantidade = parseInt(document.getElementById('ia-quantidade').value);
+  var nivel      = document.getElementById('ia-nivel').value;
+  var contexto   = document.getElementById('ia-contexto').value.trim();
 
-  const btnText = document.getElementById('btn-gerar-text');
-  const btn     = document.getElementById('btn-gerar');
+  var btnText = document.getElementById('btn-gerar-text');
+  var btn     = document.getElementById('btn-gerar');
   btn.disabled  = true;
-  btnText.textContent = 'Gerando…';
+  btnText.textContent = 'Gerando...';
 
   document.getElementById('ia-loading').style.display  = 'block';
   document.getElementById('ia-results').style.display  = 'none';
   document.getElementById('ia-error').style.display    = 'none';
 
-  const prompt = buildPrompt(assunto, quantidade, nivel, contexto);
+  var prompt = buildPrompt(assunto, quantidade, nivel, contexto);
 
   try {
-    const res = await fetch(IA_ENDPOINT, {
+    // O Apps Script faz o redirect 302 para /exec. O fetch segue.
+    var firstRes = await fetch(APPS_SCRIPT_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + IA_KEY,
-        'HTTP-Referer': window.location.href
-      },
-      body: JSON.stringify({
-        model: IA_MODEL,
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7,
-        max_tokens: 4096
-      })
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ prompt: prompt })
     });
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || 'HTTP ' + res.status);
+    var data;
+    if (firstRes.ok) {
+      data = await firstRes.json();
+    } else {
+      // Fallback: GET com prompt na URL (workaround para alguns navegadores)
+      var encoded = encodeURIComponent(prompt);
+      var res2 = await fetch(APPS_SCRIPT_URL + '?prompt=' + encoded);
+      data = await res2.json();
     }
 
-    const data = await res.json();
-    let raw    = data.choices?.[0]?.message?.content || '';
-    // Remove markdown code fences se existirem
-    raw = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-    const parsed = JSON.parse(raw);
-    generatedQuestions = Array.isArray(parsed) ? parsed : parsed.questoes || [];
+    if (data && data.error) {
+      throw new Error(data.error);
+    }
+    if (!data || !data.questoes || !data.questoes.length) {
+      throw new Error('A IA não retornou questões. Tente outro prompt.');
+    }
 
+    generatedQuestions = data.questoes;
     renderIAResults(generatedQuestions, assunto);
 
   } catch (e) {
-    const errDiv = document.getElementById('ia-error');
-    errDiv.textContent = 'Erro ao gerar questões: ' + e.message;
+    var errDiv = document.getElementById('ia-error');
+    errDiv.textContent = 'Erro: ' + e.message;
     errDiv.style.display = 'block';
     console.error(e);
   } finally {
     document.getElementById('ia-loading').style.display = 'none';
     btn.disabled  = false;
-    btnText.textContent = ' Gerar Questões';
+    btnText.textContent = '⚡ Gerar Questões';
   }
 }
 
@@ -347,27 +319,23 @@ function buildPrompt(assunto, quantidade, nivel, contexto) {
     + '- Gabarito correto apenas em UMA alternativa\n'
     + '- Explicação técnica detalhada do gabarito\n'
     + '- As questões devem abordar conceitos diferentes entre si\n\n'
-    + 'Retorne APENAS um JSON válido, sem markdown, no seguinte formato:\n'
-    + '[\n  {\n    "id": 1,\n    "assunto": "' + assunto + '",\n'
-    + '    "enunciado": "texto da questão",\n'
-    + '    "opcoes": ["A) texto", "B) texto", "C) texto", "D) texto", "E) texto"],\n'
-    + '    "gabarito": "A",\n'
-    + '    "explicacao": "explicação detalhada"\n  }\n]';
+    + 'Retorne SOMENTE um JSON array válido, sem markdown, sem texto antes ou depois, no formato:\n'
+    + '[{"id":1,"assunto":"X","enunciado":"texto","opcoes":["A) texto","B) texto","C) texto","D) texto","E) texto"],"gabarito":"A","explicacao":"explicação detalhada"}]';
 }
 
 function renderIAResults(questions, assunto) {
-  const container = document.getElementById('ia-questions-list');
+  var container = document.getElementById('ia-questions-list');
   container.innerHTML = '';
-  questions.forEach((q, i) => {
-    const card = document.createElement('div');
+  questions.forEach(function(q, i) {
+    var card = document.createElement('div');
     card.className = 'ia-question-card';
-    const opts = (q.opcoes || []).map(o => {
-      const isGab = o.charAt(0) === q.gabarito;
+    var opts = (q.opcoes || []).map(function(o) {
+      var isGab = o.charAt(0) === q.gabarito;
       return '<div class="ia-opt ' + (isGab ? 'correct' : '') + '">' + o + (isGab ? ' ✓' : '') + '</div>';
     }).join('');
     card.innerHTML = '<div class="ia-q-text">' + (i+1) + '. ' + q.enunciado + '</div>'
       + '<div class="ia-opts">' + opts + '</div>'
-      + '<div class="ia-exp"> ' + q.explicacao + '</div>';
+      + '<div class="ia-exp">💡 ' + q.explicacao + '</div>';
     container.appendChild(card);
   });
   document.getElementById('ia-results').style.display = 'block';
@@ -375,27 +343,26 @@ function renderIAResults(questions, assunto) {
 }
 
 function addToBank() {
-  const startId = allQuestions.length + 1;
-  generatedQuestions.forEach((q, i) => {
+  var startId = allQuestions.length + 1;
+  generatedQuestions.forEach(function(q, i) {
     allQuestions.push({ ...q, id: startId + i, _fromIA: true });
   });
   document.getElementById('stat-total').textContent = allQuestions.length;
   document.getElementById('count-capm').textContent = allQuestions.length + ' questões';
   document.getElementById('qs-total').textContent   = allQuestions.length + ' questões';
   renderBanco();
-  showToast(generatedQuestions.length + ' questão(ões) adicionada(s) ao banco!');
+  showToast('✅ ' + generatedQuestions.length + ' questão(ões) adicionada(s) ao banco!');
 }
 
 function exportGeneratedJSON() {
-  const data = { assunto: document.getElementById('ia-assunto').value, questoes: generatedQuestions };
-  downloadJSON(data, 'cnpi-ia-' + Date.now() + '.json');
+  downloadJSON({ assunto: document.getElementById('ia-assunto').value, questoes: generatedQuestions }, 'cnpi-ia-' + Date.now() + '.json');
 }
 
-// ── Utilities ──────────────────────────────────────────────────
+// ── Utilities ────────────────────────────────────────────────
 function shuffleArray(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+  var a = [...arr];
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
@@ -406,9 +373,9 @@ function formatTime(secs) {
 }
 
 function downloadJSON(data, filename) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
   a.href     = url;
   a.download = filename;
   a.click();
@@ -416,9 +383,9 @@ function downloadJSON(data, filename) {
 }
 
 function showToast(msg) {
-  const toast = document.createElement('div');
-  toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;font-weight:600;padding:12px 24px;border-radius:999px;box-shadow:0 4px 20px rgba(34,197,94,0.4);z-index:9999;animation:fadeIn 0.3s ease;font-family:var(--font);font-size:0.9rem;';
+  var toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;font-weight:600;padding:12px 24px;border-radius:999px;box-shadow:0 4px 20px rgba(34,197,94,0.4);z-index:9999;font-size:0.9rem;';
   toast.textContent = msg;
   document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 3000);
+  setTimeout(function() { toast.remove(); }, 3000);
 }
