@@ -5,16 +5,18 @@
 
 // ── Config ────────────────────────────────────────────────────
 // ⚠️  A chave NÃO fica no código — é salva só no navegador do usuário (localStorage)
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const QWEN_MODEL = 'qwen/qwen3.6-plus:free';
+
+const OPENROUTER_KEY = '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';
 
 function getApiKey() {
-  return localStorage.getItem('cnpi_gemini_key') || '';
+  return OPENROUTER_KEY;
 }
 function saveApiKey(key) {
   localStorage.setItem('cnpi_gemini_key', key.trim());
 }
 function getEndpoint() {
-  return `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${getApiKey()}`;
+  return 'https://openrouter.ai/api/v1/chat/completions';
 }
 
 // ── State ─────────────────────────────────────────────────────
@@ -356,7 +358,7 @@ function limparChave() {
 async function gerarQuestoes() {
   const key = getApiKey();
   if (!key) {
-    document.getElementById('ia-error').textContent = '🔑 Insira sua chave da API do Gemini acima antes de gerar questões.';
+    document.getElementById('ia-error').textContent = '🔑 Chave de API não encontrada. Verifique a configuração.';
     document.getElementById('ia-error').style.display = 'block';
     return;
   }
@@ -380,14 +382,16 @@ async function gerarQuestoes() {
   try {
     const res = await fetch(getEndpoint(), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${key}`,
+        'HTTP-Referer': window.location.href
+      },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 4096,
-          responseMimeType: 'application/json'
-        }
+        model: QWEN_MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+        max_tokens: 4096
       })
     });
 
@@ -397,8 +401,10 @@ async function gerarQuestoes() {
     }
 
     const data  = await res.json();
-    const raw   = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    const parsed = JSON.parse(raw);
+    const raw   = data.choices?.[0]?.message?.content || '';
+    // Remove markdown code fences se existirem
+    const clean = raw.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+    const parsed = JSON.parse(clean);
     generatedQuestions = Array.isArray(parsed) ? parsed : parsed.questoes || [];
 
     renderIAResults(generatedQuestions, assunto);
