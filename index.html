@@ -40,7 +40,7 @@
     <div class="hero-content">
       <div class="badge">🎓 Preparatório CNPI</div>
       <h1 class="hero-title">Domine o <span class="gradient-text">CNPI</span><br/>questão por questão</h1>
-      <p class="hero-subtitle">Banco de questões por assunto, modo quiz cronometrado e geração de questões por Inteligência Artificial. Comece com <strong>CAPM</strong>.</p>
+      <p class="hero-subtitle">Banco de questões por assunto, modo quiz cronometrado e geração de questões por IA (Qwen). Comece com <strong>CAPM</strong>.</p>
       <div class="hero-actions">
         <button class="btn btn-primary" id="btn-start-quiz" onclick="startQuiz()">
           <span>Iniciar Quiz CAPM</span>
@@ -200,7 +200,19 @@
       <div class="ia-header">
         <div class="ia-icon-wrap">✨</div>
         <h2>Gerar Questões com IA</h2>
-        <p>Use o Gemini para criar novas questões no padrão CNPI. As questões geradas são adicionadas ao banco temporariamente e podem ser exportadas como JSON.</p>
+        <p>Use o     Use a IA Qwen pra criar novas questões no padrão CNPI. As questões geradas são adicionadas ao banco temporariamente e podem ser exportadas como JSON.</p>
+      </div>
+
+      <!-- Key Banner -->
+      <div class="ia-key-banner" id="ia-key-banner">
+        <span>🔑</span>
+        <div class="ia-key-text">
+          <strong>Configure sua Chave Qwen API (via OpenRouter)</strong>
+          <span>A chave fica salva só no seu navegador — nunca vai para o GitHub.</span>
+        </div>
+        <input type="password" id="ia-key-input" placeholder="Cole aqui: sk-or-v1..." autocomplete="off" />
+        <button class="btn btn-primary btn-sm" onclick="salvarChave()">Salvar</button>
+        <button class="btn btn-ghost btn-sm" onclick="limparChave()" title="Remover chave salva" style="padding:8px 10px;">🗑</button>
       </div>
 
       <div class="ia-form-card">
@@ -259,7 +271,7 @@
   <!-- ===== FOOTER ===== -->
   <footer class="footer">
     <div class="container">
-      <p>CNPI<strong>Hub</strong> · Preparatório para o exame CNPI · Powered by <strong>Gemini AI</strong></p>
+      <p>CNPI<strong>Hub</strong> · Preparatório para o exame CNPI · Powered by <strong>Qwen (OpenRouter)</strong></p>
       <p class="footer-note">Este material é gerado para fins de estudo. Confirme o conteúdo com o edital vigente da APIMEC.</p>
     </div>
   </footer>
