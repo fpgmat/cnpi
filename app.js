@@ -5,7 +5,7 @@
 
 // ── Config ───────────────────────────────────────────────────
 const IA_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
-const IA_MODEL    = 'qwen/qwen3.6-plus:free';
+const IA_MODEL    = 'qwen/qwen3.6-plus-preview:free';
 const IA_KEY      = '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';
 
 // ── State ────────────────────────────────────────────────────
